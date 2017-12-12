@@ -43,7 +43,7 @@ func PublicConnectionHandler(user *models.User) {
 				}
 				parsedCmd := cmdsBuffer[Serial]
 				parsedCmd.CmdLength += (pSize - 8)
-				parsedCmd.CmdBytes = buffer[8:pSize]
+				parsedCmd.CmdBytes = append(buffer[8:pSize], parsedCmd.CmdBytes...)
 				if step == 0 {
 					delete(cmdsBuffer, Serial)
 					cmdChan <- parsedCmd

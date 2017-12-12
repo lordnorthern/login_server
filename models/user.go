@@ -69,18 +69,18 @@ func (user *User) SendCommand(cmd Command, encryptCommand bool) error {
 	}
 
 	rand.Seed(time.Now().UnixNano())
-	totalChunks := int32(math.Ceil(float64(len(Result)) / 1024))
+	totalChunks := int32(math.Ceil(float64(len(Result)) / 200))
 	bufCmdSerial := new(bytes.Buffer)
 	binary.Write(bufCmdSerial, binary.LittleEndian, int32(rand.Intn(100000)))
 	for i := totalChunks - 1; i >= 0; i-- {
 		bufChunkNum := new(bytes.Buffer)
 		binary.Write(bufChunkNum, binary.LittleEndian, i)
-		start := i * 1024
+		start := i * 200
 		var end int32
 		if i == (totalChunks - 1) {
 			end = int32(len(Result))
 		} else {
-			end = start + 1024
+			end = start + 200
 		}
 		chunk := append(bufChunkNum.Bytes(), bufCmdSerial.Bytes()...)
 

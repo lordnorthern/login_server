@@ -41,7 +41,7 @@ func processCommands(str string) {
 		}
 		fmt.Println("Success")
 		fmt.Println("Exiting...")
-		time.Sleep(time.Second)
+		time.Sleep(time.Millisecond * 500)
 		EndServe <- true
 	}
 }
