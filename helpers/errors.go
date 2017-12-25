@@ -6,6 +6,6 @@ import (
 
 // LogError will log errors.
 // This function will allow to add a more sophisticated error handling down the road.
-func LogError(err error) {
-	fmt.Println(err)
+func LogError(err error, where ...string) {
+	fmt.Println(err, where)
 }

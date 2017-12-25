@@ -21,6 +21,10 @@ type Command interface {
 // ParsedCommand contains the bytes slice of a command after it has been stitched together
 // and also its length
 type ParsedCommand struct {
-	CmdBytes  []byte
+	CmdBytes  [][]byte
 	CmdLength int
 }
+
+// ChunkSize is the size of a chunk a command is divided into
+var ChunkSize = int32(1024)
+var BufferSize = int32(1500)

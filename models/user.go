@@ -9,6 +9,7 @@ import (
 	"math"
 	"math/rand"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/lordnorthern/login_server/helpers"
@@ -22,6 +23,7 @@ type User struct {
 	Conn          *net.Conn
 	Account       *Account
 	EncryptionKey []byte
+	SenderMutex   sync.Mutex
 }
 
 // NewConnection will create a new connection object
@@ -69,25 +71,33 @@ func (user *User) SendCommand(cmd Command, encryptCommand bool) error {
 	}
 
 	rand.Seed(time.Now().UnixNano())
-	totalChunks := int32(math.Ceil(float64(len(Result)) / 200))
+	totalChunks := int32(math.Ceil(float64(len(Result)) / float64(ChunkSize)))
 	bufCmdSerial := new(bytes.Buffer)
-	binary.Write(bufCmdSerial, binary.LittleEndian, int32(rand.Intn(100000)))
+	binary.Write(bufCmdSerial, binary.LittleEndian, int32(rand.Intn(999999))+totalChunks)
 	for i := totalChunks - 1; i >= 0; i-- {
-		bufChunkNum := new(bytes.Buffer)
-		binary.Write(bufChunkNum, binary.LittleEndian, i)
-		start := i * 200
+		start := i * ChunkSize
 		var end int32
 		if i == (totalChunks - 1) {
 			end = int32(len(Result))
 		} else {
-			end = start + 200
+			end = start + ChunkSize
 		}
-		chunk := append(bufChunkNum.Bytes(), bufCmdSerial.Bytes()...)
+		pSize := end - start
+		bufChunkNum := new(bytes.Buffer)
+		binary.Write(bufChunkNum, binary.LittleEndian, i)
 
-		chunk = append(chunk, Result[start:end]...)
-		(*user.Conn).Write(chunk)
+		bufCmdLength := new(bytes.Buffer)
+		binary.Write(bufCmdLength, binary.LittleEndian, pSize)
+		bufCmdTotalChunks := new(bytes.Buffer)
+		binary.Write(bufCmdTotalChunks, binary.LittleEndian, totalChunks)
+		var bufCmd []byte
+		bufCmd = append(bufCmd, bufChunkNum.Bytes()...)
+		bufCmd = append(bufCmd, bufCmdSerial.Bytes()...)
+		bufCmd = append(bufCmd, bufCmdLength.Bytes()...)
+		bufCmd = append(bufCmd, bufCmdTotalChunks.Bytes()...)
+		bufCmd = append(bufCmd, Result[start:end]...)
+		(*user.Conn).Write(bufCmd)
 	}
-
 	return nil
 }
 

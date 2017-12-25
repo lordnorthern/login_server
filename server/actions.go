@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/lordnorthern/login_server/helpers"
@@ -53,8 +52,7 @@ func (a *action) ServUserLogin() {
 	if convErr != nil {
 		return
 	}
-	account := findCharByUserSession(characterID, cmd.Params[1])
-	fmt.Println(account)
+	findCharByUserSession(characterID, cmd.Params[1])
 	resp := models.NewInternalCommand()
 	resp.Command = "Response"
 	resp.Params = append(resp.Params, "Test")
